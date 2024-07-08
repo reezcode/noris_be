@@ -1,12 +1,19 @@
 import client from "../../../database/client"
 import { CustomError } from "../../commons/exceptions"
+import { ExtraParam } from "../../commons/models/extra_param"
 import { getUserId } from "../user/service"
 import { Note } from "./model"
 
-const getAllNotes = async (token: string) => {
+const getAllNotes = async (token: string, param: ExtraParam) => {
     try {
         const userId = await getUserId(token)
-        const notes = await client.from('notes').select('*').eq('created_by', userId[0].id)
+        const notes = await client.from('notes')
+            .select('*')
+            .eq('created_by', userId[0].id)
+            .order(param.order_by ?? "id", { ascending: param.sort === 'asc' ? true : false })
+            .limit(param.limit ?? 10)
+            .range(param.page ? param.page * (param.limit ?? 10) : 0, param.limit ?? 10 * (param.page ?? 1))
+        console.log(notes)
         if (notes) {
             return notes
         } else {
@@ -47,4 +54,34 @@ const createNote = async (token: string, note: Note) => {
     }
 }
 
-export { getAllNotes, createNote }
+const updateNote = async (noteId: string, note: Note) => {
+    try {
+        const { error } = await client.from('notes').update(note).eq('id', noteId)
+        if (error) {
+            throw new CustomError(400, error.message)
+        }
+        return {
+            message: 'Note updated successfully',
+            content: note
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+const deleteNote = async (noteId: string) => {
+    try {
+        const { error } = await client.from('notes').delete().eq('id', noteId)
+        if (error) {
+            throw new CustomError(400, error.message)
+        } else {
+            return {
+                message: 'Note deleted successfully'
+            }
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+export { getAllNotes, createNote, updateNote, deleteNote }

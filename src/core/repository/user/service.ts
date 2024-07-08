@@ -6,7 +6,7 @@ const getUserId = async (token: string) => {
         if(token == undefined) {
             throw new CustomError(401, 'Token is required')
         } else{
-            client.auth.refreshSession
+            await client.auth.refreshSession()
             const raw = token.split(" ")
             const jwt = raw[1]
             const { data: { user } } = await client.auth.getUser(jwt)
