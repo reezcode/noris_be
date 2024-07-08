@@ -1,6 +1,7 @@
 import { exceptionResponse, response } from "../core/commons/response"
 import { Request, Response } from 'express';
-import { registerUser } from "../core/repository/auth/service";
+import { loginUser, registerUser } from "../core/repository/auth/service";
+import { CustomError } from "../core/commons/exceptions";
 
 
 const register = async (req: Request, res: Response) => {
@@ -17,18 +18,32 @@ const register = async (req: Request, res: Response) => {
                 }
             )
         } else {
-            return response(
-                res, {
-                    code: 400,
-                    success: false,
-                    message: 'User registered failed',
-                    content: data
-                }
-            )
+            return exceptionResponse(res, new CustomError(400, 'User registered failed'))
         }
     } catch (error: any) {
         return exceptionResponse(res, error)
     }
 }
 
-export { register }
+const login = async (req: Request, res: Response) => {
+    try {
+        const model = req.body
+        const data = await loginUser(model)
+        if(data.user) {
+            return response(
+                res, {
+                    code: 200,
+                    success: true,
+                    message: 'User logged in successfully',
+                    content: data
+                }
+            )
+        } else {
+            return exceptionResponse(res, new CustomError(400, 'User not found'))
+        }
+    } catch (error: any) {
+        return exceptionResponse(res, error)
+    }
+}
+
+export { register, login }

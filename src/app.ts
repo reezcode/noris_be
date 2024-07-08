@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import express from 'express';
 import authRoutes from './routes/auth_routes';
+import noteRoutes from './routes/note_routes';
 
 const app = express()
 const port = 3000
@@ -10,6 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/notes', noteRoutes)
 
 // if access other route, send 404
 app.use((req: Request, res: Response) => {

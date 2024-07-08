@@ -1,14 +1,11 @@
-import { register } from "../controllers/auth_controller";
-import validateBody, { registerSchema } from "../core/validator";
-import { Request, Response } from "express";
+import { login, register } from "../controllers/auth_controller";
+import validateBody, { loginSchema, registerSchema } from "../core/validator";
 
 const { Router } = require('express');
 
 const authRoutes = Router();
 
 authRoutes.post('/register', validateBody(registerSchema), register)
-authRoutes.get('/', (req: Request, res: Response) => {
-    res.send('NORIS BE is Active')
-})
+authRoutes.post('/login', validateBody(loginSchema), login)
 
 export default authRoutes;
