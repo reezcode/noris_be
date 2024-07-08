@@ -1,6 +1,6 @@
 import { exceptionResponse, response } from "../core/commons/response"
 import { Request, Response } from 'express';
-import { loginUser, registerUser } from "../core/repository/auth/service";
+import { loginUser, refreshSession, registerUser } from "../core/repository/auth/service";
 import { CustomError } from "../core/commons/exceptions";
 
 
@@ -46,4 +46,23 @@ const login = async (req: Request, res: Response) => {
     }
 }
 
-export { register, login }
+const getRefreshSession = async (req: Request, res:Response) => {
+    try {
+        const token = req.body.refresh_token
+        const data = await refreshSession(token)
+        if(data) {
+            return response(res, {
+                code: 200,
+                success: true,
+                message: 'Token refreshed successfully',
+                content: data
+            }) 
+        } else {
+            return exceptionResponse(res, new CustomError(400, 'Token not found'))
+        }
+    } catch (error: any) {
+        return exceptionResponse(res, error)
+    }
+}
+
+export { register, login, getRefreshSession }

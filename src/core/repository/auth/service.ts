@@ -54,4 +54,17 @@ const loginUser = async (model: LoginModel) => {
     }
 }
 
-export { registerUser, loginUser }
+const refreshSession = async (token: string) => {
+    try {
+        const {data, error} = await client.auth.refreshSession()
+        if(data){
+            return data
+        } else {
+            throw new Error(error?.message)
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+export { registerUser, loginUser, refreshSession }

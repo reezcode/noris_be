@@ -54,9 +54,10 @@ const createNote = async (token: string, note: Note) => {
     }
 }
 
-const updateNote = async (noteId: string, note: Note) => {
+const updateNote = async (token: string, noteId: string, note: Note) => {
     try {
-        const { error } = await client.from('notes').update(note).eq('id', noteId)
+        const userId = await getUserId(token)
+        const { error } = await client.from('notes').update(note).eq('id', noteId).eq('created_by', userId[0].id)
         if (error) {
             throw new CustomError(400, error.message)
         }
@@ -69,9 +70,10 @@ const updateNote = async (noteId: string, note: Note) => {
     }
 }
 
-const deleteNote = async (noteId: string) => {
+const deleteNote = async (token: string, noteId: string) => {
     try {
-        const { error } = await client.from('notes').delete().eq('id', noteId)
+        const userId = await getUserId(token)
+        const { error } = await client.from('notes').delete().eq('id', noteId).eq('created_by', userId[0].id)
         if (error) {
             throw new CustomError(400, error.message)
         } else {
@@ -84,4 +86,18 @@ const deleteNote = async (noteId: string) => {
     }
 }
 
-export { getAllNotes, createNote, updateNote, deleteNote }
+const getDetailNote = async (token: string, noteId: string) => {
+    try {
+        const userId = await getUserId(token)
+        const note = await client.from('notes').select('*').eq('id', noteId).eq('created_by', userId[0].id)
+        if (note) {
+            return note
+        } else {
+            throw new CustomError(400, 'Note not found')
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+export { getAllNotes, createNote, updateNote, deleteNote, getDetailNote }

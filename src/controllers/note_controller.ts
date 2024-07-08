@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { exceptionResponse, response } from '../core/commons/response';
-import { createNote, deleteNote, getAllNotes, updateNote } from '../core/repository/notes/service';
+import { createNote, deleteNote, getAllNotes, getDetailNote, updateNote } from '../core/repository/notes/service';
 import { CustomError } from '../core/commons/exceptions';
 
 const getNotes = async (req: Request, res: Response) => {
@@ -51,7 +51,8 @@ const updateNoteById = async (req: Request, res: Response) => {
     try {
         const noteId = req.params.noteId
         const body = req.body
-        const data = await updateNote(noteId, body)
+        const jwt = req.headers.authorization
+        const data = await updateNote(jwt!,noteId, body)
         if (data) {
             return response(res, {
                 code: 200,
@@ -70,7 +71,8 @@ const updateNoteById = async (req: Request, res: Response) => {
 const deleteNoteById = async (req: Request, res: Response) => {
     try {
         const noteId = req.params.noteId
-        const data = await deleteNote(noteId)
+        const jwt = req.headers.authorization
+        const data = await deleteNote(jwt!, noteId)
         if (data) {
             return response(res, {
                 code: 200,
@@ -85,4 +87,24 @@ const deleteNoteById = async (req: Request, res: Response) => {
     }
 }
 
-export { getNotes, createSingleNote, updateNoteById, deleteNoteById }
+const detailNote = async (req: Request, res: Response) => {
+    try {
+        const noteId = req.params.noteId
+        const jwt = req.headers.authorization
+        const data = await getDetailNote(jwt!, noteId)
+        if (data) {
+            return response(res, {
+                code: 200,
+                success: true,
+                message: 'Note fetched successfully',
+                content: data.data![0]
+            });
+        } else {
+            return exceptionResponse(res, new CustomError(400, 'Note not found'))
+        }
+    } catch(error: any) {
+        return exceptionResponse(res, error)
+    }
+}
+
+export { getNotes, createSingleNote, updateNoteById, deleteNoteById, detailNote }
