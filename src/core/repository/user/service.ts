@@ -10,6 +10,9 @@ const getUserId = async (token: string) => {
             const raw = token.split(" ")
             const jwt = raw[1]
             const { data: { user } } = await client.auth.getUser(jwt)
+            if(user == null){
+                throw new CustomError(401, 'User not found')
+            }
             const { data, error } = await client.from('users').select('id').eq('email', user?.email!)
             if (error) {
                 throw error
