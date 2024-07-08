@@ -10,8 +10,9 @@ const getAllNotes = async (token: string, param: ExtraParam) => {
         const notes = await client.from('notes')
             .select('*')
             .eq('created_by', userId[0].id)
+            .eq('name', param.search ?? '')
             .order(param.order_by ?? "id", { ascending: param.sort === 'asc' ? true : false })
-            .limit(param.limit ?? 10)
+            .limit((param.limit ?? 10)-1)
             .range(param.page ? param.page * (param.limit ?? 10) : 0, param.limit ?? 10 * (param.page ?? 1))
         console.log(notes)
         if (notes) {
